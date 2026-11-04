@@ -4,6 +4,6 @@ import (
 	"net/http"
 )
 
-func prefixStripper(next http.Handler) http.Handler {
+func prefixAppStripper(next http.Handler) http.Handler {
 	return http.StripPrefix("/app", next)
 }
