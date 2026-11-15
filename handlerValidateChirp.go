@@ -10,7 +10,7 @@ import (
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.WriteHeader(code)
 	encoder := json.NewEncoder(w)
-	err := encoder.Encode(&payload)
+	err := encoder.Encode(payload)
 	if err != nil {
 		log.Printf("Error encoding parameters: %s", err)
 		return
@@ -50,7 +50,7 @@ func handlerValidateChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(parms.Body) > 140 {
-		respondWithError(w, 400, "Chirp too long")
+		respondWithError(w, http.StatusBadRequest, "Chirp too long")
 		return
 	}
 
@@ -71,5 +71,5 @@ func handlerValidateChirp(w http.ResponseWriter, r *http.Request) {
 	resp := validResponse{
 		Cleaned_Body: cleanString,
 	}
-	respondWithJSON(w, 200, resp)
+	respondWithJSON(w, http.StatusOK, resp)
 }
