@@ -2,21 +2,14 @@ package main
 
 import (
 	"database/sql"
-
 	"fmt"
-
-	"os"
-
 	"net/http"
-
+	"os"
 	"sync/atomic"
-
 	"time"
 
 	"github.com/SittingBox/Chirpy/internal/database"
-
 	"github.com/joho/godotenv"
-
 	_ "github.com/lib/pq"
 )
 
