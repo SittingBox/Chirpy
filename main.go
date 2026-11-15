@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"net/http"
 
 	"sync/atomic"
@@ -30,6 +31,8 @@ func main() {
 		doc := fmt.Sprintf("<html><body><h1>Welcome, Chirpy Admin</h1><p>Chirpy has been visited %d times!</p></body></html>", apiCfg.fileserverHits.Load())
 		w.Write([]byte(doc))
 	})
+
+	serveMux.HandleFunc("POST /api/validate_chirp/", handlerValidateChirp)
 
 	serveMux.HandleFunc("POST /admin/reset", func(w http.ResponseWriter, r *http.Request) {
 		apiCfg.fileserverHits.Store(0)
