@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -11,8 +10,10 @@ import (
 
 func handlerCreateUser(w http.ResponseWriter, r *http.Request, cfg *apiConfig) {
 	type userEmail struct {
-		Email string `json:"email"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
+
 	decoder := json.NewDecoder(r.Body)
 	email := userEmail{}
 	err := decoder.Decode(&email)
@@ -40,8 +41,6 @@ func handlerCreateUser(w http.ResponseWriter, r *http.Request, cfg *apiConfig) {
 		UpdatedAt: createdUser.UpdatedAt,
 		Email:     createdUser.Email,
 	}
-
-	fmt.Printf("%+v\n", newUser)
 
 	respondWithJSON(w, 201, newUser)
 

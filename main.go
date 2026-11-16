@@ -45,10 +45,8 @@ func main() {
 	serveMux.HandleFunc("GET /api/healthz", handlerHealthz)
 
 	serveMux.HandleFunc("GET /admin/metrics", func(w http.ResponseWriter, r *http.Request) {
-		handlerMetrics(w, r, apiCfg)
+		handlerMetrics(w, apiCfg)
 	})
-
-	serveMux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
 
 	serveMux.HandleFunc("POST /admin/reset", func(w http.ResponseWriter, r *http.Request) {
 		handlerReset(w, r, apiCfg)
@@ -56,6 +54,18 @@ func main() {
 
 	serveMux.HandleFunc("POST /api/users", func(w http.ResponseWriter, r *http.Request) {
 		handlerCreateUser(w, r, apiCfg)
+	})
+
+	serveMux.HandleFunc("POST /api/chirps", func(w http.ResponseWriter, r *http.Request) {
+		handlerChirps(w, r, apiCfg)
+	})
+
+	serveMux.HandleFunc("GET /api/chirps", func(w http.ResponseWriter, r *http.Request) {
+		handlerRequestChirps(w, r, apiCfg)
+	})
+
+	serveMux.HandleFunc("GET /api/chirps/{chirpID}", func(w http.ResponseWriter, r *http.Request) {
+		handlerSingleChirpResponse(w, r, apiCfg)
 	})
 
 	server := &http.Server{
