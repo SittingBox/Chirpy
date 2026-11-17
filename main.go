@@ -56,6 +56,10 @@ func main() {
 		handlerCreateUser(w, r, apiCfg)
 	})
 
+	serveMux.HandleFunc("POST /api/login", func(w http.ResponseWriter, r *http.Request) {
+		handlerLogin(w, r, apiCfg)
+	})
+
 	serveMux.HandleFunc("POST /api/chirps", func(w http.ResponseWriter, r *http.Request) {
 		handlerChirps(w, r, apiCfg)
 	})
