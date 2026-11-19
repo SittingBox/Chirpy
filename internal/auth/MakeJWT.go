@@ -2,9 +2,9 @@ package auth
 
 import (
 	"time"
-	"uuid"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {

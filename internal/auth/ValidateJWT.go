@@ -1,9 +1,8 @@
 package auth
 
 import (
-	"uuid"
-
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
@@ -12,7 +11,7 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 		return []byte(tokenSecret), nil
 	})
 	if err != nil {
-		return uuid.Nil(), err
+		return uuid.Nil, err
 	}
 
 	tokenSubject, err := token.Claims.GetSubject()
