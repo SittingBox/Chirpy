@@ -2,31 +2,41 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/SittingBox/Chirpy/internal/auth"
 	"github.com/SittingBox/Chirpy/internal/database"
 	"github.com/google/uuid"
 )
 
 func handlerChirps(w http.ResponseWriter, r *http.Request, cfg *apiConfig) {
-	handlerValidateChirp(w, r, cfg)
+	bearerToken, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Could not resolve bearer token")
+		return
+	}
+
+	userID, err := auth.ValidateJWT(bearerToken, cfg.secret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Could not validate token")
+		return
+	}
+
+	handlerValidateChirp(w, r, userID, cfg)
 }
 
-func handlerValidateChirp(w http.ResponseWriter, r *http.Request, cfg *apiConfig) {
+func handlerValidateChirp(w http.ResponseWriter, r *http.Request, userID uuid.UUID, cfg *apiConfig) {
 	type parameters struct {
-		Body   string    `json:"body"`
-		UserID uuid.UUID `json:"user_id"`
+		Body string `json:"body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	parms := parameters{}
 	err := decoder.Decode(&parms)
 	if err != nil {
-		log.Printf("Error decoding parameters: %s", err)
-		w.WriteHeader(500)
+		respondWithError(w, http.StatusBadRequest, "Could not decode sent json")
 		return
 	}
 
@@ -46,12 +56,12 @@ func handlerValidateChirp(w http.ResponseWriter, r *http.Request, cfg *apiConfig
 
 	cleanString := strings.Join(words, " ")
 
-	chirp, err := cfg.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{
+	createdChirp, err := cfg.dbQueries.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body:   cleanString,
-		UserID: parms.UserID,
+		UserID: userID,
 	})
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Error sending chirp")
+		respondWithError(w, http.StatusInternalServerError, "Error sending chirp")
 		return
 	}
 
@@ -63,14 +73,14 @@ func handlerValidateChirp(w http.ResponseWriter, r *http.Request, cfg *apiConfig
 		UserID    uuid.UUID `json:"user_id"`
 	}
 
-	Chirp := validChirp{
-		ID:        chirp.ID,
-		CreatedAt: chirp.CreatedAt,
-		UpdatedAt: chirp.UpdatedAt,
-		Body:      chirp.Body,
-		UserID:    chirp.UserID,
+	chirp := validChirp{
+		ID:        createdChirp.ID,
+		CreatedAt: createdChirp.CreatedAt,
+		UpdatedAt: createdChirp.UpdatedAt,
+		Body:      createdChirp.Body,
+		UserID:    createdChirp.UserID,
 	}
 
-	respondWithJSON(w, http.StatusCreated, Chirp)
+	respondWithJSON(w, http.StatusCreated, chirp)
 
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"sync/atomic"
@@ -17,26 +18,40 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
 	platform       string
+	secret         string
 }
 
 func main() {
 	godotenv.Load()
 
 	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		log.Fatal("DB_URL must be set")
+	}
 
 	db, err := sql.Open("postgres", dbURL)
 
 	dbQueries := database.New(db)
 
+	secret := os.Getenv("SECRET")
+	if secret == "" {
+		log.Fatal("Secret must be set")
+	}
+
 	platform := os.Getenv("PLATFORM")
-	fmt.Println("PLATFORM loaded as:", platform)
+	if platform == "" {
+		log.Fatal("Platform must be set")
+	}
 
 	apiCfg := &apiConfig{
 		dbQueries: dbQueries,
 		platform:  platform,
+		secret:    secret,
 	}
 
 	serveMux := http.NewServeMux()
+
+	fmt.Println("Server is starting!")
 
 	serveMux.Handle("/app/", prefixAppStripper(apiCfg.middlewareMetric(http.FileServer(http.Dir(".")))))
 
